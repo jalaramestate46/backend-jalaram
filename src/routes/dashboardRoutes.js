@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
+const { isConfigured } = require('../config/supabaseClient');
 const { upload, uploadToSupabase } = require('../middleware/uploadMiddleware');
 const {
   getLogin,
@@ -43,6 +44,14 @@ const protectDashboard = (req, res, next) => {
       res.clearCookie('accessToken');
       return res.redirect('/admin/login');
     }
+    
+    // Validate UUID format when Supabase is configured to avoid invalid database query syntax
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(decoded.id);
+    if (isConfigured && !isUuid) {
+      res.clearCookie('accessToken');
+      return res.redirect('/admin/login');
+    }
+
     req.user = decoded;
     next();
   } catch (error) {
