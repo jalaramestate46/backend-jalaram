@@ -69,6 +69,11 @@ app.use('/api/favorites', favoriteRoutes);
 // Mount Admin Web Panel Dashboard Router
 app.use('/admin', dashboardRoutes);
 
+// Redirect root to Admin Dashboard
+app.get('/', (req, res) => {
+  res.redirect('/admin');
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   const { isConfigured } = require('./src/config/supabaseClient');
