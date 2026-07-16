@@ -12,7 +12,7 @@ const {
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const { restrictTo } = require('../middleware/roleMiddleware');
-const { upload } = require('../middleware/uploadMiddleware');
+const { upload, uploadToSupabase } = require('../middleware/uploadMiddleware');
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
@@ -22,7 +22,7 @@ router.post('/refreshToken', refreshAccessToken);
 // Protected routes
 router.get('/', protect, restrictTo('admin'), getAllUsers);
 router.put('/:idOrUsername', protect, updateUserProfile);
-router.patch('/:id', protect, upload.single('avatar'), patchUser);
+router.patch('/:id', protect, upload.single('avatar'), uploadToSupabase, patchUser);
 router.delete('/:id', protect, restrictTo('admin'), deleteUser);
 
 module.exports = router;

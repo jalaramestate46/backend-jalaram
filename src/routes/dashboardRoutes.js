@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const { upload } = require('../middleware/uploadMiddleware');
+const { upload, uploadToSupabase } = require('../middleware/uploadMiddleware');
 const {
   getLogin,
   postLogin,
@@ -62,8 +62,8 @@ router.get('/', protectDashboard, (req, res) => res.redirect('/admin/dashboard')
 
 // Properties management EJS pages
 router.get('/properties', protectDashboard, getProperties);
-router.post('/properties/create', protectDashboard, upload.array('images', 10), createProperty);
-router.post('/properties/:id/edit', protectDashboard, upload.array('images', 10), editProperty);
+router.post('/properties/create', protectDashboard, upload.array('images', 10), uploadToSupabase, createProperty);
+router.post('/properties/:id/edit', protectDashboard, upload.array('images', 10), uploadToSupabase, editProperty);
 router.get('/properties/:id/delete', protectDashboard, deleteProperty);
 
 // Projects management EJS pages
@@ -71,11 +71,11 @@ router.get('/projects', protectDashboard, getProjects);
 router.post('/projects/create', protectDashboard, upload.fields([
   { name: 'images', maxCount: 10 },
   { name: 'brochure', maxCount: 1 }
-]), createProject);
+]), uploadToSupabase, createProject);
 router.post('/projects/:id/edit', protectDashboard, upload.fields([
   { name: 'images', maxCount: 10 },
   { name: 'brochure', maxCount: 1 }
-]), editProject);
+]), uploadToSupabase, editProject);
 router.get('/projects/:id/delete', protectDashboard, deleteProject);
 
 // Inquiries / Leads log
@@ -100,6 +100,6 @@ router.post('/content/:section', protectDashboard, upload.fields([
   { name: 'heroImage', maxCount: 1 },
   { name: 'insetImage', maxCount: 1 },
   { name: 'videoPreviewImage', maxCount: 1 }
-]), postContent);
+]), uploadToSupabase, postContent);
 
 module.exports = router;

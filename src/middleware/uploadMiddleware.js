@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { supabase, isConfigured } = require('../config/supabaseClient');
 
 const isVercel = !!(process.env.VERCEL || process.env.NOW_REGION || __dirname.includes('/var/task') || __dirname.includes('var/task') || __dirname.includes('vercel'));
 const uploadDir = isVercel ? '/tmp' : path.join(__dirname, '../../public/uploads');
@@ -46,4 +47,73 @@ const upload = multer({
   }
 });
 
-module.exports = { upload };
+// Middleware to upload files to Supabase Storage automatically if configured
+const uploadToSupabaseMiddleware = async (req, res, next) => {
+  if (!isConfigured) {
+    return next();
+  }
+
+  const uploadFile = async (file) => {
+    try {
+      const fileBuffer = fs.readFileSync(file.path);
+      const filePath = `${file.filename}`;
+
+      // Upload file directly to 'uploads' bucket
+      const { data, error } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, fileBuffer, {
+          contentType: file.mimetype,
+          upsert: true
+        });
+
+      if (error) {
+        console.error("Supabase Storage Upload Error:", error.message);
+        return;
+      }
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      file.supabaseUrl = publicUrl;
+      
+      // Clean up the local temp file to keep Vercel temp memory low
+      try {
+        fs.unlinkSync(file.path);
+      } catch (err) {
+        // ignore local delete issues
+      }
+    } catch (err) {
+      console.error("Failed to upload to Supabase Storage:", err.message);
+    }
+  };
+
+  try {
+    if (req.file) {
+      await uploadFile(req.file);
+    }
+    if (req.files) {
+      if (Array.isArray(req.files)) {
+        for (const file of req.files) {
+          await uploadFile(file);
+        }
+      } else if (typeof req.files === 'object') {
+        for (const key of Object.keys(req.files)) {
+          for (const file of req.files[key]) {
+            await uploadFile(file);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error in uploadToSupabaseMiddleware:", err.message);
+  }
+
+  next();
+};
+
+module.exports = { 
+  upload,
+  uploadToSupabase: uploadToSupabaseMiddleware
+};

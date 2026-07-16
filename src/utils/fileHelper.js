@@ -1,7 +1,9 @@
 const buildFileUrl = (req, file) => {
   if (!file) return null;
-  // If the file was uploaded via Supabase storage (when configured), we can return that URL.
-  // Otherwise, return the local server absolute URL.
+  // If the file was uploaded via Supabase storage, return that URL directly
+  if (file.supabaseUrl) {
+    return file.supabaseUrl;
+  }
   const host = req.get('host');
   const protocol = req.protocol;
   return `${protocol}://${host}/uploads/${file.filename}`;
