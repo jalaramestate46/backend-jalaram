@@ -4,9 +4,13 @@ const fs = require('fs');
 
 const uploadDir = path.join(__dirname, '../../public/uploads');
 
-// Ensure upload directory exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Ensure upload directory exists safely (prevent crashes in read-only environments like Vercel)
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (error) {
+  console.warn("Warning: Could not create upload directory on startup:", error.message);
 }
 
 // Set up storage engine
