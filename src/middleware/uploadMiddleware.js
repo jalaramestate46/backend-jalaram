@@ -50,18 +50,18 @@ const uploadFileToSupabase = async (file) => {
   const filePath = file.filename;
 
   const { error } = await supabaseAdmin.storage
-    .from('upload')
+    .from('uploads')
     .upload(filePath, fileBuffer, {
       contentType: file.mimetype,
       upsert: true
     });
 
   if (error) {
-    throw new Error(`Supabase Storage upload failed: ${error.message}. Make sure the 'upload' bucket exists and is public in your Supabase dashboard.`);
+    throw new Error(`Supabase Storage upload failed: ${error.message}. Make sure the 'uploads' bucket exists and is public in your Supabase dashboard.`);
   }
 
   const { data: { publicUrl } } = supabaseAdmin.storage
-    .from('upload')
+    .from('uploads')
     .getPublicUrl(filePath);
 
   file.supabaseUrl = publicUrl;
