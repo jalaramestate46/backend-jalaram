@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabase, supabaseAdmin, isConfigured } = require('../config/supabaseClient');
 const { buildFileUrl, buildFilesUrls } = require('../utils/fileHelper');
 
 // Import caches/mock tables from REST API controllers
@@ -282,7 +282,7 @@ const createProperty = async (req, res, next) => {
       };
       mockProperties.unshift(newProp);
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('properties')
         .insert({
           title,
@@ -347,7 +347,7 @@ const editProperty = async (req, res, next) => {
         };
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('properties')
         .update({
           title,
@@ -387,7 +387,7 @@ const deleteProperty = async (req, res, next) => {
         mockProperties.splice(propIdx, 1);
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('properties')
         .delete()
         .eq('id', id);
@@ -502,7 +502,7 @@ const createProject = async (req, res, next) => {
       };
       mockProjects.unshift(newProj);
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('projects')
         .insert({
           title,
@@ -573,7 +573,7 @@ const editProject = async (req, res, next) => {
         };
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('projects')
         .update({
           title,
@@ -611,7 +611,7 @@ const deleteProject = async (req, res, next) => {
         mockProjects.splice(projIdx, 1);
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('projects')
         .delete()
         .eq('id', id);
@@ -702,7 +702,7 @@ const deleteInquiry = async (req, res, next) => {
         mockInquiries.splice(inqIdx, 1);
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('inquiries')
         .delete()
         .eq('id', id);
@@ -764,7 +764,7 @@ const approveReview = async (req, res, next) => {
         mockReviews[revIdx].status = 'approved';
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('reviews')
         .update({ status: 'approved' })
         .eq('id', id);
@@ -789,7 +789,7 @@ const rejectReview = async (req, res, next) => {
         mockReviews[revIdx].status = 'rejected';
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('reviews')
         .update({ status: 'rejected' })
         .eq('id', id);
@@ -814,7 +814,7 @@ const deleteReview = async (req, res, next) => {
         mockReviews.splice(revIdx, 1);
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('reviews')
         .delete()
         .eq('id', id);
@@ -899,7 +899,7 @@ const toggleUserRole = async (req, res, next) => {
       
       if (user) {
         const nextRole = user.role === 'admin' ? 'user' : 'admin';
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
           .from('users')
           .update({ role: nextRole })
           .eq('id', id);
@@ -930,7 +930,7 @@ const deleteUser = async (req, res, next) => {
         mockUsers.splice(userIdx, 1);
       }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('users')
         .delete()
         .eq('id', id);
@@ -1056,13 +1056,13 @@ const postContent = async (req, res, next) => {
         .maybeSingle();
 
       if (record) {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
           .from('site_content')
           .update({ data: dataToSave, updated_at: new Date().toISOString() })
           .eq('id', section);
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
           .from('site_content')
           .insert({ id: section, data: dataToSave });
         if (error) throw error;
