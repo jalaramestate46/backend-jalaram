@@ -1,0 +1,106 @@
+<%- include('partials/header') %>
+<%- include('partials/navigation') %>
+
+<div>
+  <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">User Permissions Portal</h2>
+  <p class="text-sm text-slate-500 mt-1">Audit active accounts, adjust administrative permission roles, or delete unused accounts.</p>
+</div>
+
+<!-- Users List -->
+<section class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+          <th class="py-4 px-6">User Account</th>
+          <th class="py-4 px-6">Contact Info</th>
+          <th class="py-4 px-6">Joined Date</th>
+          <th class="py-4 px-6">Current Role</th>
+          <th class="py-4 px-6 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-150">
+        <% if (users && users.length > 0) { %>
+          <% users.forEach(u => { %>
+            <tr class="hover:bg-slate-50/50 text-slate-700 text-sm transition">
+              <!-- Account info -->
+              <td class="py-4 px-6 align-top">
+                <div class="flex items-center gap-3 mt-1">
+                  <div class="h-10 w-10 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center overflow-hidden">
+                    <% if (u.avatar) { %>
+                      <img src="<%= u.avatar %>" class="h-full w-full object-cover">
+                    <% } else { %>
+                      <i class="fa-solid fa-user text-slate-400 text-sm"></i>
+                    <% } %>
+                  </div>
+                  <div>
+                    <span class="font-bold text-slate-900 block leading-none"><%= u.fullName %></span>
+                    <span class="font-mono text-[10px] text-slate-400 block mt-1">@<%= u.username %></span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Contacts -->
+              <td class="py-4 px-6 align-top">
+                <div class="space-y-0.5 mt-1">
+                  <span class="block text-xs font-semibold text-slate-700"><i class="fa-regular fa-envelope text-[9px] text-slate-400 mr-1.5"></i><%= u.email %></span>
+                  <span class="block font-mono text-xs text-slate-500"><i class="fa-solid fa-phone text-[9px] text-slate-400 mr-1.5"></i><%= u.mobile %></span>
+                </div>
+              </td>
+
+              <!-- Date -->
+              <td class="py-4 px-6 align-top text-xs text-slate-450 font-semibold">
+                <div class="mt-2.5">
+                  <%= new Date(u.createdAt).toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'}) %>
+                </div>
+              </td>
+
+              <!-- Current Role badge -->
+              <td class="py-4 px-6 align-top">
+                <div class="mt-1.5">
+                  <% if (u.role === 'admin') { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-0.5 text-xs font-bold text-primary-700 border border-primary-100">Administrator</span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-0.5 text-xs font-bold text-slate-600 border border-slate-200">Standard User</span>
+                  <% } %>
+                </div>
+              </td>
+
+              <!-- Actions -->
+              <td class="py-4 px-6 text-center align-top shrink-0">
+                <div class="flex items-center justify-center gap-1.5 mt-1">
+                  <!-- Toggle Role link -->
+                  <a href="/admin/users/<%= u._id %>/toggle-role" 
+                     class="h-9 px-3 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-primary-600 hover:border-primary-250 hover:bg-primary-50 flex items-center justify-center gap-1 text-xs font-bold transition" 
+                     title="Switch permissions level">
+                    <i class="fa-solid fa-shuffle"></i> Toggle Role
+                  </a>
+                  
+                  <!-- Disable delete for logged in admin account (self) -->
+                  <% if (adminUser.id !== u._id) { %>
+                    <a href="/admin/users/<%= u._id %>/delete" 
+                       onclick="return confirm('Permanently delete this user account?')"
+                       class="h-9 w-9 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-red-600 hover:border-red-200 hover:bg-red-50 flex items-center justify-center transition" 
+                       title="Delete Account">
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </a>
+                  <% } else { %>
+                    <span class="h-9 w-9 bg-slate-100 border border-slate-200 text-slate-300 rounded-xl flex items-center justify-center" title="Self account cannot be deleted">
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </span>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="5" class="text-center py-16 text-slate-400 italic">No user accounts found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

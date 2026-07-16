@@ -1,0 +1,95 @@
+<!-- Sidebar Navigation -->
+<aside class="w-full md:w-72 bg-slate-900 text-white flex flex-col shrink-0 border-r border-slate-800 shadow-xl z-20">
+  <!-- Brand logo header -->
+  <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+    <a href="/admin/dashboard" class="flex items-center gap-3">
+      <div class="h-10 w-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+        <i class="fa-solid fa-hotel text-lg text-white"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-bold tracking-tight text-white/95">Shree Jalaram</h1>
+        <span class="text-[10px] uppercase tracking-widest text-primary-400 font-bold block -mt-1">Estate Admin</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Menu navigation links -->
+  <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+    <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition <%= activeTab === 'dashboard' ? 'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/10' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' %>">
+      <i class="fa-solid fa-chart-pie text-base shrink-0 w-5 text-center"></i>
+      <span>Dashboard</span>
+    </a>
+    
+    <a href="/admin/properties" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition <%= activeTab === 'properties' ? 'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/10' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' %>">
+      <i class="fa-solid fa-house-chimney text-base shrink-0 w-5 text-center"></i>
+      <span>Properties</span>
+    </a>
+
+    <a href="/admin/projects" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition <%= activeTab === 'projects' ? 'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/10' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' %>">
+      <i class="fa-solid fa-building-user text-base shrink-0 w-5 text-center"></i>
+      <span>Projects</span>
+    </a>
+
+    <a href="/admin/inquiries" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition <%= activeTab === 'inquiries' ? 'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/10' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' %>">
+      <i class="fa-solid fa-envelope-open-text text-base shrink-0 w-5 text-center"></i>
+      <span>Leads & Inquiries</span>
+    </a>
+
+    <a href="/admin/reviews" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition <%= activeTab === 'reviews' ? 'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/10' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' %>">
+      <i class="fa-solid fa-comments text-base shrink-0 w-5 text-center"></i>
+      <span>Customer Reviews</span>
+    </a>
+
+    <a href="/admin/users" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition <%= activeTab === 'users' ? 'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/10' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' %>">
+      <i class="fa-solid fa-user-gear text-base shrink-0 w-5 text-center"></i>
+      <span>User Access</span>
+    </a>
+
+    <a href="/admin/content" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition <%= activeTab === 'content' ? 'bg-primary-600 text-white font-bold shadow-lg shadow-primary-600/10' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' %>">
+      <i class="fa-solid fa-gears text-base shrink-0 w-5 text-center"></i>
+      <span>Site Content & SEO</span>
+    </a>
+  </nav>
+
+  <!-- Logout/User card footer -->
+  <div class="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="h-9 w-9 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700">
+        <i class="fa-solid fa-user-tie text-slate-300 text-sm"></i>
+      </div>
+      <div>
+        <span class="text-xs font-semibold text-slate-300 block leading-none truncate w-32"><%= adminUser?.fullName || 'Jalaram Admin' %></span>
+        <span class="text-[10px] text-slate-500 font-medium block mt-0.5">Administrator</span>
+      </div>
+    </div>
+    <a href="/admin/logout" class="h-8 w-8 text-red-400 hover:bg-red-500/10 rounded-lg flex items-center justify-center transition" title="Log Out">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </a>
+  </div>
+</aside>
+
+<!-- Main content container right area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden">
+  <!-- Top bar header -->
+  <header class="h-16 border-b border-slate-200 bg-white px-6 md:px-8 flex items-center justify-between shrink-0 z-10 shadow-sm">
+    <div class="flex items-center gap-3">
+      <span class="text-sm font-bold text-slate-400 uppercase tracking-wider"><%= pageCategory || 'Control Panel' %></span>
+      <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+      <span class="text-sm font-semibold text-slate-700"><%= pageTitle || 'Welcome' %></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Database Status indicator -->
+      <% if (supabaseConfigured) { %>
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Supabase Connected
+        </span>
+      <% } else { %>
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-200" title="Running in session memory mode. Changes will not be saved permanently.">
+          <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span> In-Memory Demo
+        </span>
+      <% } %>
+    </div>
+  </header>
+
+  <!-- Inner Scroll Area -->
+  <div class="flex-1 p-6 md:p-8 overflow-y-auto space-y-8">

@@ -1,0 +1,211 @@
+<%- include('partials/header') %>
+<%- include('partials/navigation') %>
+
+<div>
+  <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Customer Leads Logs</h2>
+  <p class="text-sm text-slate-500 mt-1">Review contact inquiries, properties and projects requests submitted by website visitors.</p>
+</div>
+
+<!-- Category Filters Counters -->
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <%
+    const totalLeads = inquiries.length;
+    const contactLeads = inquiries.filter(i => i.type === 'contact').length;
+    const projectLeads = inquiries.filter(i => i.type === 'project').length;
+    const propertyLeads = inquiries.filter(i => i.type === 'property').length;
+  %>
+  <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-1">
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-450">Total Leads</span>
+    <div class="flex items-center justify-between">
+      <span class="text-2xl font-black text-slate-800"><%= totalLeads %></span>
+      <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-800">Logs</span>
+    </div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-1">
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-450">Contacts Info</span>
+    <div class="flex items-center justify-between">
+      <span class="text-2xl font-black text-blue-700"><%= contactLeads %></span>
+      <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-800">Mailbox</span>
+    </div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-1">
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-450">Project Interest</span>
+    <div class="flex items-center justify-between">
+      <span class="text-2xl font-black text-emerald-700"><%= projectLeads %></span>
+      <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-800">Ongoing</span>
+    </div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-1">
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-450">Property Requests</span>
+    <div class="flex items-center justify-between">
+      <span class="text-2xl font-black text-amber-700"><%= propertyLeads %></span>
+      <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-amber-50 text-amber-800">Buy/Rent</span>
+    </div>
+  </div>
+</div>
+
+<!-- Search & Filtering Widget -->
+<div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col sm:flex-row gap-4 items-center justify-between">
+  <div class="relative w-full sm:max-w-md">
+    <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+      <i class="fa-solid fa-magnifying-glass text-sm"></i>
+    </span>
+    <input
+      type="text"
+      id="leads-search"
+      placeholder="Search leads by name, phone or message text..."
+      class="w-full rounded-full border border-slate-200 pl-11 pr-5 py-3 outline-none focus:border-primary-500 bg-slate-50 text-sm text-slate-800"
+    />
+  </div>
+
+  <select
+    id="leads-filter"
+    class="rounded-full border border-slate-200 px-5 py-2.5 outline-none bg-white text-sm text-slate-700 w-full sm:w-auto font-semibold cursor-pointer"
+  >
+    <option value="all">All Categories</option>
+    <option value="contact">Contact Message</option>
+    <option value="project">Project Interest</option>
+    <option value="property">Property Request</option>
+  </select>
+</div>
+
+<!-- Leads List Table -->
+<section class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse" id="leads-table">
+      <thead>
+        <tr class="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+          <th class="py-4 px-6">Customer</th>
+          <th class="py-4 px-6">Contact Info</th>
+          <th class="py-4 px-6">Category</th>
+          <th class="py-4 px-6">Reference Asset</th>
+          <th class="py-4 px-6">Submitted Message</th>
+          <th class="py-4 px-6 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-150">
+        <% if (inquiries && inquiries.length > 0) { %>
+          <% inquiries.forEach(inq => { %>
+            <tr class="hover:bg-slate-50/50 text-slate-700 text-sm transition lead-row" data-type="<%= inq.type %>">
+              <!-- Customer Name -->
+              <td class="py-4 px-6 font-bold text-slate-900 search-target align-top">
+                <div class="mt-1"><%= inq.name %></div>
+              </td>
+              
+              <!-- Phone / Email -->
+              <td class="py-4 px-6 align-top">
+                <div class="space-y-0.5 mt-1">
+                  <span class="block font-mono text-xs text-slate-700 search-target"><i class="fa-solid fa-phone text-[9px] text-slate-400 mr-1.5"></i><%= inq.mobile %></span>
+                  <% if (inq.email) { %>
+                    <span class="block text-xs text-slate-400 search-target"><i class="fa-regular fa-envelope text-[9px] text-slate-400 mr-1.5"></i><%= inq.email %></span>
+                  <% } %>
+                </div>
+              </td>
+
+              <!-- Lead Category -->
+              <td class="py-4 px-6 align-top">
+                <div class="mt-1">
+                  <% if (inq.type === 'contact') { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700 border border-blue-100">Contact</span>
+                  <% } else if (inq.type === 'project') { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-100">Project Int.</span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-700 border border-amber-100">Property Int.</span>
+                  <% } %>
+                </div>
+              </td>
+
+              <!-- Reference Asset -->
+              <td class="py-4 px-6 align-top font-medium text-slate-800">
+                <div class="mt-1">
+                  <% if (inq.type === 'project' && inq.project) { %>
+                    <span class="block text-xs font-bold"><%= inq.project.title %></span>
+                    <span class="block text-[10px] text-slate-400 font-mono">slug: <%= inq.project.slug %></span>
+                  <% } else if (inq.type === 'property' && inq.property) { %>
+                    <span class="block text-xs font-bold"><%= inq.property.title %></span>
+                  <% } else { %>
+                    <span class="text-slate-350 italic text-xs font-normal">Direct Site Visit</span>
+                  <% } %>
+                </div>
+              </td>
+
+              <!-- Message -->
+              <td class="py-4 px-6 align-top">
+                <p class="text-slate-500 text-xs leading-relaxed max-w-sm search-target mt-1"><%= inq.message %></p>
+              </td>
+
+              <!-- Action Buttons -->
+              <td class="py-4 px-6 text-center align-top shrink-0">
+                <div class="flex items-center justify-center gap-1.5 mt-1">
+                  <a href="https://wa.me/<%= inq.mobile.replace(/\+/g, '').replace(/\s+/g, '') %>" 
+                     target="_blank"
+                     class="h-9 w-9 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-green-600 hover:border-green-200 hover:bg-green-50 flex items-center justify-center transition" 
+                     title="Reply on WhatsApp">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                  </a>
+                  <a href="/admin/inquiries/<%= inq._id %>/delete" 
+                     onclick="return confirm('Delete this lead entry permanent?')"
+                     class="h-9 w-9 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-red-600 hover:border-red-200 hover:bg-red-50 flex items-center justify-center transition" 
+                     title="Remove Lead">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr id="empty-row">
+            <td colspan="6" class="text-center py-16 text-slate-400 italic">No customer inquiries submitted yet.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Client Side Table Search Filtering -->
+<script>
+  const searchInput = document.getElementById('leads-search');
+  const typeFilter = document.getElementById('leads-filter');
+  const rows = document.querySelectorAll('.lead-row');
+  const emptyRow = document.getElementById('empty-row');
+
+  const filterTable = () => {
+    const q = searchInput.value.toLowerCase().trim();
+    const type = typeFilter.value;
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const targets = row.querySelectorAll('.search-target');
+      let textMatch = false;
+      
+      targets.forEach(el => {
+        if (el.textContent.toLowerCase().includes(q)) {
+          textMatch = true;
+        }
+      });
+
+      if (q === "") textMatch = true;
+
+      const typeMatch = (type === "all") || (row.getAttribute('data-type') === type);
+
+      if (textMatch && typeMatch) {
+        row.style.display = "";
+        visibleCount++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    if (emptyRow) {
+      emptyRow.style.display = visibleCount === 0 ? "" : "none";
+    }
+  };
+
+  if (searchInput && typeFilter) {
+    searchInput.addEventListener('input', filterTable);
+    typeFilter.addEventListener('change', filterTable);
+  }
+</script>
+
+<%- include('partials/footer') %>

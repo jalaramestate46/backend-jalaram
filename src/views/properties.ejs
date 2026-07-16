@@ -1,0 +1,215 @@
+<%- include('partials/header') %>
+<%- include('partials/navigation') %>
+
+<% if (action === 'new' || action === 'edit') { %>
+  <!-- CREATE OR EDIT FORM VIEW -->
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm max-w-4xl mx-auto space-y-6">
+    <div class="flex items-center justify-between border-b border-slate-150 pb-5">
+      <h3 class="font-extrabold text-xl text-slate-900 flex items-center gap-2">
+        <i class="fa-solid fa-house-circle-check text-primary-500"></i>
+        <%= action === 'new' ? 'List New Property' : 'Edit Property Details' %>
+      </h3>
+      <a href="/admin/properties" class="text-xs font-bold text-slate-500 hover:text-slate-700 uppercase tracking-widest transition">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Back to List
+      </a>
+    </div>
+
+    <form action="<%= action === 'new' ? '/admin/properties/create' : '/admin/properties/' + property._id + '/edit' %>" method="POST" enctype="multipart/form-data" class="space-y-6">
+      
+      <!-- Grid Fields -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Property Headline Title</label>
+          <input type="text" name="title" required value="<%= action === 'edit' ? property.title : '' %>"
+                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-medium">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Full Description</label>
+          <textarea name="description" rows="4" required 
+                    class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500"><%= action === 'edit' ? property.description : '' %></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Transaction Type</label>
+          <select name="transactionType" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-semibold bg-white">
+            <option value="Buy" <%= action === 'edit' && property.transactionType === 'Buy' ? 'selected' : '' %>>Buy</option>
+            <option value="Rent" <%= action === 'edit' && property.transactionType === 'Rent' ? 'selected' : '' %>>Rent</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Property Type</label>
+          <select name="propertyType" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-semibold bg-white">
+            <option value="Residential" <%= action === 'edit' && property.propertyType === 'Residential' ? 'selected' : '' %>>Residential</option>
+            <option value="Commercial" <%= action === 'edit' && property.propertyType === 'Commercial' ? 'selected' : '' %>>Commercial</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Category</label>
+          <input type="text" name="category" required placeholder="e.g. Apartment, Shop, Plot" value="<%= action === 'edit' ? property.category : '' %>"
+                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-medium">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Location Area</label>
+          <input type="text" name="location" required placeholder="e.g. Adajan, Jahangirabad" value="<%= action === 'edit' ? property.location : '' %>"
+                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-medium">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detailed Address</label>
+          <input type="text" name="address" required placeholder="Street name, landmark details..." value="<%= action === 'edit' ? property.address : '' %>"
+                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-medium">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Price (INR)</label>
+          <input type="number" name="price" required placeholder="Price in Rupees" value="<%= action === 'edit' ? property.price : '' %>"
+                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-semibold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Size Area (Sq. Ft.)</label>
+          <input type="number" name="sqt" required placeholder="Total area size" value="<%= action === 'edit' ? property.sqt : '' %>"
+                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-semibold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bedrooms (BHK)</label>
+          <input type="text" name="bedrooms" placeholder="e.g. 3 BHK, 4 BHK or leave empty" value="<%= action === 'edit' ? property.bedrooms : '' %>"
+                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-medium">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bathrooms</label>
+          <input type="number" name="bathrooms" placeholder="e.g. 2, 3 or leave empty" value="<%= action === 'edit' ? property.bathrooms : '' %>"
+                 class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-primary-500 font-medium">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Upload Photos</label>
+          <input type="file" name="images" multiple accept="image/*"
+                 class="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+          <% if (action === 'edit' && property.images && property.images.length > 0) { %>
+            <div class="mt-4 space-y-2">
+              <span class="block text-xs text-slate-400 font-semibold">Current Images (Uncheck to delete):</span>
+              <div class="flex flex-wrap gap-3">
+                <% property.images.forEach(img => { %>
+                  <label class="relative group cursor-pointer block border border-slate-200 rounded-xl overflow-hidden h-16 w-16 shadow-sm">
+                    <img src="<%= img %>" class="h-full w-full object-cover">
+                    <input type="checkbox" name="existingImages" value="<%= img %>" checked 
+                           class="absolute top-1 left-1 rounded focus:ring-primary-500 text-primary-600">
+                  </label>
+                <% }) %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-150 pt-6 flex items-center justify-end gap-3">
+        <a href="/admin/properties" class="px-5 py-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-slate-100 transition">Cancel</a>
+        <button type="submit" class="px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-2xl text-sm font-bold transition shadow-lg shadow-primary-600/10 flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span><%= action === 'new' ? 'Publish Listing' : 'Save Modifications' %></span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+<% } else { %>
+  <!-- PROPERTIES LIST VIEW -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Properties Listing</h2>
+      <p class="text-sm text-slate-500 mt-1">Configure and audit residential properties, land plots, bungalows, and offices.</p>
+    </div>
+    <a href="/admin/properties?action=new" class="px-5 py-3.5 bg-primary-600 hover:bg-primary-500 text-white rounded-2xl text-sm font-bold transition shadow-lg shadow-primary-600/10 flex items-center gap-2">
+      <i class="fa-solid fa-plus text-xs"></i> Add Property
+    </a>
+  </div>
+
+  <section class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+            <th class="py-4 px-6">Headline</th>
+            <th class="py-4 px-6">Location</th>
+            <th class="py-4 px-6">Details</th>
+            <th class="py-4 px-6">Price</th>
+            <th class="py-4 px-6 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-150">
+          <% if (properties && properties.length > 0) { %>
+            <% properties.forEach(prop => { %>
+              <tr class="hover:bg-slate-50/50 text-slate-700 text-sm transition">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-4">
+                    <img src="<%= prop.images && prop.images[0] ? prop.images[0] : '/image.png' %>" class="h-12 w-12 rounded-xl object-cover border border-slate-200">
+                    <div>
+                      <span class="font-bold text-slate-900 block leading-snug"><%= prop.title %></span>
+                      <div class="flex items-center gap-1.5 mt-1">
+                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200/50"><%= prop.propertyType %></span>
+                        <span class="inline-flex items-center rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-bold text-primary-700 border border-primary-100/50"><%= prop.transactionType %></span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-6 align-top">
+                  <div class="space-y-0.5 mt-1">
+                    <span class="font-semibold text-slate-800 block"><%= prop.location %></span>
+                    <span class="text-xs text-slate-400 block"><%= prop.address %></span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 align-top">
+                  <div class="space-y-0.5 mt-1">
+                    <span class="font-mono text-xs block"><i class="fa-solid fa-arrows-left-right text-slate-400 mr-1.5 text-[10px]"></i><%= prop.sqt %> Sq. Ft.</span>
+                    <% if (prop.bedrooms) { %>
+                      <span class="text-xs text-slate-500 block"><i class="fa-solid fa-bed text-slate-400 mr-1 text-[10px]"></i> <%= prop.bedrooms %></span>
+                    <% } %>
+                  </div>
+                </td>
+                <td class="py-4 px-6 font-extrabold text-slate-900 align-top">
+                  <div class="mt-1">
+                    <% if (prop.price >= 10000000) { %>
+                      <%= (prop.price / 10000000).toFixed(2) %> Crore
+                    <% } else if (prop.price >= 100000) { %>
+                      <%= (prop.price / 100000).toFixed(2) %> Lakh
+                    <% } else { %>
+                      <%= prop.price.toLocaleString('en-IN') %>
+                    <% } %>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-center align-top shrink-0">
+                  <div class="flex items-center justify-center gap-1.5 mt-1">
+                    <a href="/admin/properties?action=edit&id=<%= prop._id %>" 
+                       class="h-9 w-9 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 flex items-center justify-center transition" 
+                       title="Edit Listing">
+                      <i class="fa-solid fa-pen text-xs"></i>
+                    </a>
+                    <a href="/admin/properties/<%= prop._id %>/delete" 
+                       onclick="return confirm('Remove this property listing permanent?')"
+                       class="h-9 w-9 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-red-600 hover:border-red-200 hover:bg-red-50 flex items-center justify-center transition" 
+                       title="Remove Listing">
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="text-center py-16 text-slate-400 italic">No properties listed yet. Start by clicking Add Property above.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% } %>
+
+<%- include('partials/footer') %>

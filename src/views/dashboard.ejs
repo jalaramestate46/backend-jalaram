@@ -1,0 +1,170 @@
+<%- include('partials/header') %>
+<%- include('partials/navigation') %>
+
+<!-- Statistics Counters Grid -->
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <!-- Properties Card -->
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+    <div class="space-y-2">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Total Listings</span>
+      <span class="text-3xl font-extrabold text-slate-900 block leading-none"><%= stats.properties %></span>
+      <a href="/admin/properties" class="text-xs font-semibold text-primary-600 hover:text-primary-700 inline-flex items-center gap-1">
+        Manage <i class="fa-solid fa-chevron-right text-[8px]"></i>
+      </a>
+    </div>
+    <div class="h-12 w-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+      <i class="fa-solid fa-house-chimney text-xl"></i>
+    </div>
+  </div>
+
+  <!-- Projects Card -->
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+    <div class="space-y-2">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Active Projects</span>
+      <span class="text-3xl font-extrabold text-slate-900 block leading-none"><%= stats.projects %></span>
+      <a href="/admin/projects" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1">
+        Manage <i class="fa-solid fa-chevron-right text-[8px]"></i>
+      </a>
+    </div>
+    <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+      <i class="fa-solid fa-building-user text-xl"></i>
+    </div>
+  </div>
+
+  <!-- Leads Card -->
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+    <div class="space-y-2">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Customer Leads</span>
+      <span class="text-3xl font-extrabold text-slate-900 block leading-none"><%= stats.inquiries %></span>
+      <a href="/admin/inquiries" class="text-xs font-semibold text-amber-600 hover:text-amber-700 inline-flex items-center gap-1">
+        Review <i class="fa-solid fa-chevron-right text-[8px]"></i>
+      </a>
+    </div>
+    <div class="h-12 w-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+      <i class="fa-solid fa-envelope-open-text text-xl"></i>
+    </div>
+  </div>
+
+  <!-- Reviews Card -->
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+    <div class="space-y-2">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block">Pending Reviews</span>
+      <span class="text-3xl font-extrabold text-slate-900 block leading-none"><%= stats.reviews %></span>
+      <a href="/admin/reviews" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+        Moderate <i class="fa-solid fa-chevron-right text-[8px]"></i>
+      </a>
+    </div>
+    <div class="h-12 w-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+      <i class="fa-solid fa-comments text-xl"></i>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-[1.8fr_1fr] gap-8">
+  <!-- Recent Leads/Inquiries -->
+  <div class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+    <div class="p-6 border-b border-slate-150 flex items-center justify-between">
+      <h3 class="font-bold text-slate-900 flex items-center gap-2 text-lg">
+        <i class="fa-solid fa-envelope-open text-primary-500"></i> Recent Customer Leads
+      </h3>
+      <a href="/admin/inquiries" class="text-xs font-bold text-primary-600 hover:underline uppercase tracking-wider">See All</a>
+    </div>
+    <div class="overflow-x-auto flex-1">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-widest border-b border-slate-200">
+            <th class="py-3.5 px-6">Name</th>
+            <th class="py-3.5 px-6">Contact Info</th>
+            <th class="py-3.5 px-6">Lead Category</th>
+            <th class="py-3.5 px-6">Date</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-150">
+          <% if (recentInquiries && recentInquiries.length > 0) { %>
+            <% recentInquiries.forEach(inq => { %>
+              <tr class="hover:bg-slate-50/50 text-slate-700 text-sm transition">
+                <td class="py-4 px-6 font-semibold text-slate-900"><%= inq.name %></td>
+                <td class="py-4 px-6">
+                  <div class="space-y-0.5">
+                    <span class="block font-mono text-xs text-slate-600"><i class="fa-solid fa-phone text-[9px] text-slate-400 mr-1"></i><%= inq.mobile %></span>
+                    <% if (inq.email) { %>
+                      <span class="block text-xs text-slate-400"><i class="fa-regular fa-envelope text-[9px] text-slate-400 mr-1"></i><%= inq.email %></span>
+                    <% } %>
+                  </div>
+                </td>
+                <td class="py-4 px-6">
+                  <% if (inq.type === 'contact') { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700">Contact</span>
+                  <% } else if (inq.type === 'project') { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">Project Int.</span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-700">Property Int.</span>
+                  <% } %>
+                </td>
+                <td class="py-4 px-6 text-xs text-slate-400 font-medium">
+                  <%= new Date(inq.createdAt).toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'}) %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="4" class="text-center py-10 text-slate-400 italic">No customer leads found.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Administrative Tools Panel -->
+  <div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+      <h3 class="font-bold text-slate-900 flex items-center gap-2 text-lg">
+        <i class="fa-solid fa-wand-magic-sparkles text-primary-500"></i> Quick Actions
+      </h3>
+      
+      <div class="grid grid-cols-1 gap-3">
+        <a href="/admin/properties?action=new" class="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-primary-200 hover:bg-primary-50/10 transition group">
+          <div class="flex items-center gap-3">
+            <div class="h-9 w-9 bg-primary-50 text-primary-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition">
+              <i class="fa-solid fa-plus text-sm"></i>
+            </div>
+            <div>
+              <span class="text-sm font-bold text-slate-800 block">List New Property</span>
+              <span class="text-xs text-slate-400 block mt-0.5">Residential or Commercial plot</span>
+            </div>
+          </div>
+          <i class="fa-solid fa-arrow-right text-slate-300 group-hover:translate-x-0.5 transition text-xs"></i>
+        </a>
+
+        <a href="/admin/projects?action=new" class="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-emerald-200 hover:bg-emerald-50/10 transition group">
+          <div class="flex items-center gap-3">
+            <div class="h-9 w-9 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition">
+              <i class="fa-solid fa-building-circle-check text-sm"></i>
+            </div>
+            <div>
+              <span class="text-sm font-bold text-slate-800 block">Add Featured Project</span>
+              <span class="text-xs text-slate-400 block mt-0.5">Brochure pdf and map locations</span>
+            </div>
+          </div>
+          <i class="fa-solid fa-arrow-right text-slate-300 group-hover:translate-x-0.5 transition text-xs"></i>
+        </a>
+
+        <a href="/admin/content" class="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/10 transition group">
+          <div class="flex items-center gap-3">
+            <div class="h-9 w-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition">
+              <i class="fa-solid fa-globe text-sm"></i>
+            </div>
+            <div>
+              <span class="text-sm font-bold text-slate-800 block">Edit SEO Metadata</span>
+              <span class="text-xs text-slate-400 block mt-0.5">Optimize titles and descriptions</span>
+            </div>
+          </div>
+          <i class="fa-solid fa-arrow-right text-slate-300 group-hover:translate-x-0.5 transition text-xs"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

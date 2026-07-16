@@ -1,0 +1,106 @@
+<%- include('partials/header') %>
+<%- include('partials/navigation') %>
+
+<div>
+  <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Testimonial Reviews</h2>
+  <p class="text-sm text-slate-500 mt-1">Approve, reject, or remove customer rating reviews visible on the homepage testimonials carousel.</p>
+</div>
+
+<!-- Reviews Table -->
+<section class="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+          <th class="py-4 px-6">Customer Name</th>
+          <th class="py-4 px-6">Phone Number</th>
+          <th class="py-4 px-6 text-center">Rating Stars</th>
+          <th class="py-4 px-6">Review Text Message</th>
+          <th class="py-4 px-6">Status State</th>
+          <th class="py-4 px-6 text-center">Approval Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-150">
+        <% if (reviews && reviews.length > 0) { %>
+          <% reviews.forEach(rev => { %>
+            <tr class="hover:bg-slate-50/50 text-slate-700 text-sm transition">
+              <!-- Name & Avatar -->
+              <td class="py-4 px-6 font-bold text-slate-900 align-top">
+                <div class="flex items-center gap-3 mt-1">
+                  <div class="h-9 w-9 bg-primary-50 rounded-full flex items-center justify-center border border-primary-200 font-extrabold text-primary-600 text-xs">
+                    <%= rev.name.charAt(0).toUpperCase() %>
+                  </div>
+                  <span><%= rev.name %></span>
+                </div>
+              </td>
+
+              <!-- Phone -->
+              <td class="py-4 px-6 align-top">
+                <span class="block font-mono text-xs text-slate-600 mt-2.5"><%= rev.phone %></span>
+              </td>
+
+              <!-- Stars Rating -->
+              <td class="py-4 px-6 text-center align-top">
+                <div class="flex items-center justify-center gap-0.5 text-amber-400 mt-2.5">
+                  <% for (let i = 1; i <= 5; i++) { %>
+                    <i class="<%= i <= rev.rating ? 'fa-solid' : 'fa-regular' %> fa-star text-xs"></i>
+                  <% } %>
+                </div>
+              </td>
+
+              <!-- Message -->
+              <td class="py-4 px-6 align-top">
+                <p class="text-slate-500 text-xs leading-relaxed max-w-sm mt-2.5"><%= rev.testimonial %></p>
+              </td>
+
+              <!-- Status badge -->
+              <td class="py-4 px-6 align-top">
+                <div class="mt-2">
+                  <% if (rev.status === 'approved') { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-100">Approved</span>
+                  <% } else if (rev.status === 'rejected') { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-700 border border-red-100">Rejected</span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-100">Pending</span>
+                  <% } %>
+                </div>
+              </td>
+
+              <!-- Mod Actions -->
+              <td class="py-4 px-6 text-center align-top shrink-0">
+                <div class="flex items-center justify-center gap-1.5 mt-1">
+                  <% if (rev.status !== 'approved') { %>
+                    <a href="/admin/reviews/<%= rev._id %>/approve" 
+                       class="h-9 px-3 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-emerald-600 hover:border-emerald-250 hover:bg-emerald-50 flex items-center justify-center gap-1 text-xs font-bold transition" 
+                       title="Approve Testimony">
+                      <i class="fa-solid fa-check"></i> Approve
+                    </a>
+                  <% } %>
+                  <% if (rev.status !== 'rejected') { %>
+                    <a href="/admin/reviews/<%= rev._id %>/reject" 
+                       class="h-9 px-3 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-amber-600 hover:border-amber-250 hover:bg-amber-50 flex items-center justify-center gap-1 text-xs font-bold transition" 
+                       title="Reject Testimony">
+                      <i class="fa-solid fa-xmark"></i> Reject
+                    </a>
+                  <% } %>
+                  <a href="/admin/reviews/<%= rev._id %>/delete" 
+                     onclick="return confirm('Remove this client review permanant?')"
+                     class="h-9 w-9 bg-slate-50 text-slate-500 border border-slate-200 rounded-xl hover:text-red-600 hover:border-red-200 hover:bg-red-50 flex items-center justify-center transition" 
+                     title="Remove Review">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="6" class="text-center py-16 text-slate-400 italic">No customer reviews submitted yet.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
