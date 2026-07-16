@@ -1,4 +1,4 @@
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabase, supabaseAdmin, isConfigured } = require('../config/supabaseClient');
 const { buildFilesUrls } = require('../utils/fileHelper');
 
 // Fallback projects in-memory mock database
@@ -248,7 +248,7 @@ const createProject = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Slug must be unique. A project with this slug already exists.' });
     }
 
-    const { data: newProject, error } = await supabase
+    const { data: newProject, error } = await supabaseAdmin
       .from('projects')
       .insert({
         title,
@@ -400,7 +400,7 @@ const editProject = async (req, res, next) => {
     if (faqsList !== undefined) updatePayload.faqs = faqsList;
     updatePayload.images = finalImages;
 
-    const { data: updatedProject, error: updateError } = await supabase
+    const { data: updatedProject, error: updateError } = await supabaseAdmin
       .from('projects')
       .update(updatePayload)
       .eq('id', id)
@@ -450,7 +450,7 @@ const deleteProject = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Project not found.' });
     }
 
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await supabaseAdmin
       .from('projects')
       .delete()
       .eq('id', id);

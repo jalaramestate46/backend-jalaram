@@ -1,4 +1,4 @@
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabase, supabaseAdmin, isConfigured } = require('../config/supabaseClient');
 
 // Lazy session memory cache fallback when Supabase is not configured
 let siteContentCache = null;
@@ -214,7 +214,7 @@ const updateContentSection = async (req, res, next) => {
     let result;
     if (record) {
       // Update existing record
-      const { data: updatedRecord, error: updateError } = await supabase
+      const { data: updatedRecord, error: updateError } = await supabaseAdmin
         .from('site_content')
         .update({
           data: updateData,
@@ -228,7 +228,7 @@ const updateContentSection = async (req, res, next) => {
       result = updatedRecord;
     } else {
       // Create new record
-      const { data: insertedRecord, error: insertError } = await supabase
+      const { data: insertedRecord, error: insertError } = await supabaseAdmin
         .from('site_content')
         .insert({
           id: section,

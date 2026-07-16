@@ -1,4 +1,4 @@
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabase, supabaseAdmin, isConfigured } = require('../config/supabaseClient');
 
 // Fallback inquiries in-memory database
 let mockInquiries = [
@@ -79,7 +79,7 @@ const createInquiry = async (req, res, next) => {
       insertData.property_id = propertyId;
     }
 
-    const { data: newInquiry, error } = await supabase
+    const { data: newInquiry, error } = await supabaseAdmin
       .from('inquiries')
       .insert(insertData)
       .select('*')
@@ -188,7 +188,7 @@ const deleteInquiry = async (req, res, next) => {
       });
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('inquiries')
       .delete()
       .eq('id', id);

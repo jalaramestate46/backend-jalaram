@@ -1,4 +1,4 @@
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabase, supabaseAdmin, isConfigured } = require('../config/supabaseClient');
 
 // Fallback reviews in-memory database
 let mockReviews = [
@@ -104,7 +104,7 @@ const addReview = async (req, res, next) => {
       });
     }
 
-    const { data: newReview, error } = await supabase
+    const { data: newReview, error } = await supabaseAdmin
       .from('reviews')
       .insert({
         name,
@@ -155,7 +155,7 @@ const updateReviewStatus = async (req, res, next) => {
       });
     }
 
-    const { data: updatedReview, error } = await supabase
+    const { data: updatedReview, error } = await supabaseAdmin
       .from('reviews')
       .update({ status })
       .eq('id', id)
@@ -193,7 +193,7 @@ const deleteReview = async (req, res, next) => {
       });
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('reviews')
       .delete()
       .eq('id', id);

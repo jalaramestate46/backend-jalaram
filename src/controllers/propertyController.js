@@ -1,4 +1,4 @@
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabase, supabaseAdmin, isConfigured } = require('../config/supabaseClient');
 const { buildFilesUrls } = require('../utils/fileHelper');
 
 // Fallback properties in-memory mock database
@@ -348,7 +348,7 @@ const createProperty = async (req, res, next) => {
       });
     }
 
-    const { data: newProperty, error } = await supabase
+    const { data: newProperty, error } = await supabaseAdmin
       .from('properties')
       .insert({
         title,
@@ -513,7 +513,7 @@ const editProperty = async (req, res, next) => {
     
     updatePayload.images = finalImages;
 
-    const { data: updatedProperty, error: updateError } = await supabase
+    const { data: updatedProperty, error: updateError } = await supabaseAdmin
       .from('properties')
       .update(updatePayload)
       .eq('id', id)
@@ -571,7 +571,7 @@ const deleteProperty = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Access denied: You cannot delete this listing.' });
     }
 
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await supabaseAdmin
       .from('properties')
       .delete()
       .eq('id', id);
@@ -643,7 +643,7 @@ const toggleFavoriteProperty = async (req, res, next) => {
 
     if (favorite) {
       // Remove from favorites
-      const { error: removeError } = await supabase
+      const { error: removeError } = await supabaseAdmin
         .from('favorites')
         .delete()
         .eq('user_id', userId)
@@ -658,7 +658,7 @@ const toggleFavoriteProperty = async (req, res, next) => {
       });
     } else {
       // Add to favorites
-      const { error: addError } = await supabase
+      const { error: addError } = await supabaseAdmin
         .from('favorites')
         .insert({
           user_id: userId,

@@ -2,83 +2,106 @@ const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseAnonKey = process.env.SUPABASE_KEY;
+const supabaseServiceRoleKey = process.env.service_role;
 
+// ─────────────────────────────────────────────────────────
+// Helper: create mock proxy when Supabase is not configured
+// ─────────────────────────────────────────────────────────
+const createMockChain = () => {
+  const chain = {};
+  const chainMethods = [
+    'select', 'insert', 'update', 'delete', 'upsert',
+    'eq', 'neq', 'gt', 'lt', 'gte', 'lte',
+    'like', 'ilike', 'is', 'in', 'contains', 'containedBy',
+    'range', 'order', 'limit', 'single', 'maybeSingle',
+    'csv', 'auth', 'storage', 'from'
+  ];
+
+  chainMethods.forEach(method => {
+    chain[method] = () => createMockChain();
+  });
+
+  chain.then = (resolve, reject) => {
+    const err = new Error(
+      'Supabase is not configured. Please set SUPABASE_URL and SUPABASE_KEY in your .env file.'
+    );
+    if (reject) reject(err);
+    else throw err;
+  };
+
+  return chain;
+};
+
+const createMockClient = (label) => {
+  console.warn(`[Supabase] ${label} client is NOT configured — running in mock/fallback mode.`);
+  return new Proxy({}, {
+    get: (target, prop) => {
+      if (prop === 'from') return () => createMockChain();
+      if (prop === 'storage') return createMockChain();
+      return () => {
+        const msg = `[Supabase ${label}] Tried to access '${String(prop)}' but credentials are not set.`;
+        console.error(msg);
+        throw new Error(msg);
+      };
+    }
+  });
+};
+
+// ─────────────────────────────────────────────────────────
+// Anon client  (public / read operations)
+// ─────────────────────────────────────────────────────────
 let supabaseClient;
-const isConfigured = !!(supabaseUrl && supabaseKey && supabaseUrl.startsWith('http'));
+const isConfigured = !!(supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith('http'));
 
 if (isConfigured) {
   try {
-    supabaseClient = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      }
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
     });
-    console.log("Supabase Client initialized successfully.");
-  } catch (error) {
-    console.error("Failed to initialize real Supabase client:", error.message);
+    console.log('[Supabase] Anon client initialized successfully.');
+  } catch (err) {
+    console.error('[Supabase] Failed to initialize anon client:', err.message);
   }
 }
 
 if (!supabaseClient) {
-  console.warn("************************************************************************");
-  console.warn(" WARNING: Supabase URL or Key is missing / invalid in .env file.");
-  console.warn(" The backend is running in dynamic warning mode.");
-  console.warn(" Configure SUPABASE_URL and SUPABASE_KEY in backend/.env to connect.");
-  console.warn("************************************************************************");
+  console.warn('************************************************************************');
+  console.warn(' WARNING: SUPABASE_URL or SUPABASE_KEY is missing / invalid.');
+  console.warn(' Backend running in fallback/mock mode for anon client.');
+  console.warn('************************************************************************');
+  supabaseClient = createMockClient('anon');
+}
 
-  // Create a handler proxy to catch calls and throw a clean error when queried
-  const throwNotConfigured = (propName) => {
-    return () => {
-      const msg = `Database query error: Tried to access '${propName}' but Supabase credentials are not configured in your backend .env file.`;
-      console.error(msg);
-      throw new Error(msg);
-    };
-  };
+// ─────────────────────────────────────────────────────────
+// Admin client  (service role — bypasses RLS)
+// Used for: writes, deletes, storage uploads, admin queries
+// ─────────────────────────────────────────────────────────
+let supabaseAdminClient;
+const isAdminConfigured = !!(supabaseUrl && supabaseServiceRoleKey && supabaseUrl.startsWith('http'));
 
-  // Mock builder pattern for Supabase JS client
-  const createMockChain = () => {
-    const chain = {};
-    const chainMethods = [
-      'select', 'insert', 'update', 'delete', 'eq', 'neq', 'gt', 'lt', 'gte', 'lte',
-      'like', 'ilike', 'is', 'in', 'contains', 'containedBy', 'range', 'order', 'limit',
-      'single', 'maybeSingle', 'csv', 'auth', 'storage', 'from'
-    ];
-
-    chainMethods.forEach(method => {
-      chain[method] = () => {
-        if (method === 'from') {
-          return createMockChain();
-        }
-        return createMockChain();
-      };
+if (isAdminConfigured) {
+  try {
+    supabaseAdminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false
+      }
     });
+    console.log('[Supabase] Admin (service role) client initialized successfully.');
+  } catch (err) {
+    console.error('[Supabase] Failed to initialize admin client:', err.message);
+  }
+}
 
-    // Terminating then promise handler
-    chain.then = (resolve, reject) => {
-      const err = new Error("Supabase is not configured. Please set SUPABASE_URL and SUPABASE_KEY in your .env file.");
-      if (reject) {
-        reject(err);
-      } else {
-        throw err;
-      }
-    };
-
-    return chain;
-  };
-
-  supabaseClient = new Proxy({}, {
-    get: (target, prop) => {
-      if (prop === 'from') {
-        return () => createMockChain();
-      }
-      return throwNotConfigured(String(prop));
-    }
-  });
+if (!supabaseAdminClient) {
+  console.warn('[Supabase] service_role key is missing — admin client running in mock mode.');
+  supabaseAdminClient = createMockClient('admin');
 }
 
 module.exports = {
-  supabase: supabaseClient,
-  isConfigured
+  supabase: supabaseClient,          // anon key  — public reads
+  supabaseAdmin: supabaseAdminClient, // service role — writes / admin ops
+  isConfigured,
+  isAdminConfigured
 };

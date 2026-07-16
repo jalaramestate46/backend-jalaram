@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabase, supabaseAdmin, isConfigured } = require('../config/supabaseClient');
 const { buildFileUrl } = require('../utils/fileHelper');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jalaram_estate_jwt_access_secret_key_2026_change_me';
@@ -128,7 +128,7 @@ const registerUser = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Insert user (default role is 'user')
-    const { data: newUser, error } = await supabase
+    const { data: newUser, error } = await supabaseAdmin
       .from('users')
       .insert({
         username,
@@ -458,7 +458,7 @@ const updateUserProfile = async (req, res, next) => {
     if (mobile) updateData.mobile = mobile;
     if (username) updateData.username = username;
 
-    const { data: updatedUser, error: updateError } = await supabase
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
       .from('users')
       .update(updateData)
       .eq('id', user.id)
@@ -542,7 +542,7 @@ const patchUser = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'No updates provided.' });
     }
 
-    const { data: updatedUser, error } = await supabase
+    const { data: updatedUser, error } = await supabaseAdmin
       .from('users')
       .update(updateData)
       .eq('id', id)
@@ -593,7 +593,7 @@ const deleteUser = async (req, res, next) => {
       });
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('users')
       .delete()
       .eq('id', id);

@@ -1,12 +1,12 @@
 const bcrypt = require('bcryptjs');
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabaseAdmin, isAdminConfigured } = require('../config/supabaseClient');
 const { fallbacks } = require('../controllers/contentController');
 
 const seed = async () => {
   console.log("Starting database seeding process...");
 
-  if (!isConfigured) {
-    console.error("ERROR: Cannot seed database. Supabase is not configured in backend/.env.");
+  if (!isAdminConfigured) {
+    console.error("ERROR: Cannot seed database. Supabase service_role key is not configured in backend/.env.");
     process.exit(1);
   }
 
@@ -16,7 +16,7 @@ const seed = async () => {
     const adminEmail = 'admin@jalaram.com';
     const adminUsername = 'admin';
 
-    const { data: existingAdmin, error: findError } = await supabase
+    const { data: existingAdmin, error: findError } = await supabaseAdmin
       .from('users')
       .select('id')
       .eq('email', adminEmail)
@@ -29,7 +29,7 @@ const seed = async () => {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('admin123', salt);
 
-      const { data: newAdmin, error: insertError } = await supabase
+      const { data: newAdmin, error: insertError } = await supabaseAdmin
         .from('users')
         .insert({
           username: adminUsername,
@@ -53,14 +53,14 @@ const seed = async () => {
     for (const [sectionKey, fallbackValue] of Object.entries(fallbacks)) {
       console.log(`Processing site section: '${sectionKey}'...`);
 
-      const { data: existingSection } = await supabase
+      const { data: existingSection } = await supabaseAdmin
         .from('site_content')
         .select('id')
         .eq('id', sectionKey)
         .maybeSingle();
 
       if (!existingSection) {
-        const { error: contentInsertError } = await supabase
+        const { error: contentInsertError } = await supabaseAdmin
           .from('site_content')
           .insert({
             id: sectionKey,

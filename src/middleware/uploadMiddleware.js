@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { supabase, isConfigured } = require('../config/supabaseClient');
+const { supabaseAdmin, isAdminConfigured } = require('../config/supabaseClient');
 
 const isVercel = !!(process.env.VERCEL || process.env.NOW_REGION || __dirname.includes('/var/task') || __dirname.includes('var/task') || __dirname.includes('vercel'));
 const uploadDir = isVercel ? '/tmp' : path.join(__dirname, '../../public/uploads');
@@ -49,19 +49,19 @@ const uploadFileToSupabase = async (file) => {
   const fileBuffer = fs.readFileSync(file.path);
   const filePath = file.filename;
 
-  const { error } = await supabase.storage
-    .from('uploads')
+  const { error } = await supabaseAdmin.storage
+    .from('upload')
     .upload(filePath, fileBuffer, {
       contentType: file.mimetype,
       upsert: true
     });
 
   if (error) {
-    throw new Error(`Supabase Storage upload failed: ${error.message}. Make sure the 'uploads' bucket exists and is public in your Supabase dashboard.`);
+    throw new Error(`Supabase Storage upload failed: ${error.message}. Make sure the 'upload' bucket exists and is public in your Supabase dashboard.`);
   }
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('uploads')
+  const { data: { publicUrl } } = supabaseAdmin.storage
+    .from('upload')
     .getPublicUrl(filePath);
 
   file.supabaseUrl = publicUrl;
@@ -76,8 +76,8 @@ const uploadFileToSupabase = async (file) => {
 // On Vercel: MANDATORY — aborts with 503 if upload fails (prevents saving broken URLs)
 // On local dev: skips Supabase and uses local /uploads folder
 const uploadToSupabaseMiddleware = async (req, res, next) => {
-  // Skip Supabase upload on local dev (no VERCEL env set and isConfigured)
-  if (!isConfigured) {
+  // Skip Supabase upload on local dev (no VERCEL env set and isAdminConfigured)
+  if (!isAdminConfigured) {
     return next();
   }
 
