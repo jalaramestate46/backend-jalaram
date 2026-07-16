@@ -6,7 +6,7 @@ const { supabase, isConfigured } = require('../config/supabaseClient');
 const isVercel = !!(process.env.VERCEL || process.env.NOW_REGION || __dirname.includes('/var/task') || __dirname.includes('var/task') || __dirname.includes('vercel'));
 const uploadDir = isVercel ? '/tmp' : path.join(__dirname, '../../public/uploads');
 
-// Ensure upload directory exists safely (prevent crashes in read-only environments like Vercel)
+// Ensure upload directory exists safely
 try {
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -31,7 +31,6 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   const allowedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.pdf'];
   const ext = path.extname(file.originalname).toLowerCase();
-  
   if (allowedExtensions.includes(ext)) {
     cb(null, true);
   } else {
@@ -42,75 +41,108 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB
-  }
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
 });
 
-// Middleware to upload files to Supabase Storage automatically if configured
+// Upload a single file to Supabase Storage — returns public URL or throws
+const uploadFileToSupabase = async (file) => {
+  const fileBuffer = fs.readFileSync(file.path);
+  const filePath = file.filename;
+
+  const { error } = await supabase.storage
+    .from('uploads')
+    .upload(filePath, fileBuffer, {
+      contentType: file.mimetype,
+      upsert: true
+    });
+
+  if (error) {
+    throw new Error(`Supabase Storage upload failed: ${error.message}. Make sure the 'uploads' bucket exists and is public in your Supabase dashboard.`);
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('uploads')
+    .getPublicUrl(filePath);
+
+  file.supabaseUrl = publicUrl;
+
+  // Clean up temp file
+  try { fs.unlinkSync(file.path); } catch (_) {}
+
+  return publicUrl;
+};
+
+// Middleware: upload all files to Supabase Storage
+// On Vercel: MANDATORY — aborts with 503 if upload fails (prevents saving broken URLs)
+// On local dev: skips Supabase and uses local /uploads folder
 const uploadToSupabaseMiddleware = async (req, res, next) => {
+  // Skip Supabase upload on local dev (no VERCEL env set and isConfigured)
   if (!isConfigured) {
     return next();
   }
 
-  const uploadFile = async (file) => {
-    try {
-      const fileBuffer = fs.readFileSync(file.path);
-      const filePath = `${file.filename}`;
-
-      // Upload file directly to 'uploads' bucket
-      const { data, error } = await supabase.storage
-        .from('uploads')
-        .upload(filePath, fileBuffer, {
-          contentType: file.mimetype,
-          upsert: true
-        });
-
-      if (error) {
-        console.error("Supabase Storage Upload Error:", error.message);
-        return;
-      }
-
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(filePath);
-
-      file.supabaseUrl = publicUrl;
-      
-      // Clean up the local temp file to keep Vercel temp memory low
-      try {
-        fs.unlinkSync(file.path);
-      } catch (err) {
-        // ignore local delete issues
-      }
-    } catch (err) {
-      console.error("Failed to upload to Supabase Storage:", err.message);
-    }
-  };
-
-  try {
-    if (req.file) {
-      await uploadFile(req.file);
-    }
-    if (req.files) {
-      if (Array.isArray(req.files)) {
-        for (const file of req.files) {
-          await uploadFile(file);
-        }
-      } else if (typeof req.files === 'object') {
-        for (const key of Object.keys(req.files)) {
-          for (const file of req.files[key]) {
-            await uploadFile(file);
-          }
-        }
+  // Collect all files from req.file or req.files
+  const allFiles = [];
+  if (req.file) {
+    allFiles.push(req.file);
+  }
+  if (req.files) {
+    if (Array.isArray(req.files)) {
+      allFiles.push(...req.files);
+    } else if (typeof req.files === 'object') {
+      for (const key of Object.keys(req.files)) {
+        allFiles.push(...req.files[key]);
       }
     }
-  } catch (err) {
-    console.error("Error in uploadToSupabaseMiddleware:", err.message);
   }
 
-  next();
+  // If no files were uploaded, skip
+  if (allFiles.length === 0) {
+    return next();
+  }
+
+  try {
+    for (const file of allFiles) {
+      await uploadFileToSupabase(file);
+    }
+    next();
+  } catch (err) {
+    console.error("Supabase Storage Upload Error:", err.message);
+
+    // On Vercel: return clear error to admin — do NOT save broken URLs
+    if (isVercel) {
+      const accept = req.headers['accept'] || '';
+      if (accept.includes('text/html')) {
+        // EJS admin panel — redirect back with error message
+        return res.status(503).send(`
+          <html><body style="font-family:sans-serif;padding:2rem;background:#fef2f2;color:#991b1b">
+            <h2>⚠️ Image Upload Failed</h2>
+            <p><strong>Error:</strong> ${err.message}</p>
+            <p>To fix this permanently:</p>
+            <ol>
+              <li>Go to your <strong>Supabase Dashboard</strong></li>
+              <li>Click <strong>Storage</strong> in the left sidebar</li>
+              <li>Click <strong>"New bucket"</strong></li>
+              <li>Name it exactly: <code>uploads</code></li>
+              <li>Turn ON <strong>"Public bucket"</strong></li>
+              <li>Click <strong>Save</strong></li>
+              <li>Then retry your upload</li>
+            </ol>
+            <a href="javascript:history.back()" style="color:#1d4ed8">← Go Back</a>
+          </body></html>
+        `);
+      }
+      // API calls — return JSON error
+      return res.status(503).json({
+        success: false,
+        message: err.message
+      });
+    }
+
+    // On local dev: just warn and continue (use local path)
+    console.warn("Continuing with local file path (non-Vercel environment)");
+    next();
+  }
 };
 
 module.exports = { 
