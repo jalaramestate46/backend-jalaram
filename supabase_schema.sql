@@ -60,6 +60,7 @@ CREATE TABLE projects (
     images JSONB DEFAULT '[]'::jsonb,
     amenities JSONB DEFAULT '[]'::jsonb,
     faqs JSONB DEFAULT '[]'::jsonb,
+    brochure TEXT DEFAULT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
