@@ -62,7 +62,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Static folder configuration for uploaded local files (serve from /tmp on Vercel)
-const staticUploadsDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, 'public/uploads');
+const isVercel = !!(process.env.VERCEL || process.env.NOW_REGION || __dirname.includes('/var/task') || __dirname.includes('var/task') || __dirname.includes('vercel'));
+const staticUploadsDir = isVercel ? '/tmp' : path.join(__dirname, 'public/uploads');
 app.use('/uploads', express.static(staticUploadsDir));
 
 // Main API Router Mount
