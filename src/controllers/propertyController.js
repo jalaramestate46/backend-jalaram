@@ -126,7 +126,15 @@ const getAllProperties = async (req, res, next) => {
       .order('created_at', { ascending: false });
 
     if (userId) {
-      query = query.eq('user_id', userId);
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId);
+      if (isUuid) {
+        query = query.eq('user_id', userId);
+      } else {
+        return res.status(200).json({
+          success: true,
+          data: []
+        });
+      }
     }
 
     const { data: properties, error } = await query;
@@ -259,6 +267,14 @@ const getPropertyById = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         data: formatProperty(prop)
+      });
+    }
+
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (!isUuid) {
+      return res.status(404).json({
+        success: false,
+        message: 'Property not found.'
       });
     }
 
