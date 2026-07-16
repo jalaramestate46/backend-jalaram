@@ -68,8 +68,14 @@ router.get('/properties/:id/delete', protectDashboard, deleteProperty);
 
 // Projects management EJS pages
 router.get('/projects', protectDashboard, getProjects);
-router.post('/projects/create', protectDashboard, upload.array('images', 10), createProject);
-router.post('/projects/:id/edit', protectDashboard, upload.array('images', 10), editProject);
+router.post('/projects/create', protectDashboard, upload.fields([
+  { name: 'images', maxCount: 10 },
+  { name: 'brochure', maxCount: 1 }
+]), createProject);
+router.post('/projects/:id/edit', protectDashboard, upload.fields([
+  { name: 'images', maxCount: 10 },
+  { name: 'brochure', maxCount: 1 }
+]), editProject);
 router.get('/projects/:id/delete', protectDashboard, deleteProject);
 
 // Inquiries / Leads log

@@ -80,6 +80,7 @@ const formatProject = (proj) => {
     images: Array.isArray(proj.images) ? proj.images : [],
     amenities: Array.isArray(proj.amenities) ? proj.amenities : [],
     faqs: Array.isArray(proj.faqs) ? proj.faqs : [],
+    brochure: proj.brochure || null,
     createdAt: proj.created_at,
     updatedAt: proj.updated_at
   };

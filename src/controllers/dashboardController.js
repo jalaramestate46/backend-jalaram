@@ -472,10 +472,15 @@ const createProject = async (req, res, next) => {
     }
 
     let images = [];
-    if (req.files && req.files.length) {
-      images = buildFilesUrls(req, req.files);
+    if (req.files && req.files.images && req.files.images.length) {
+      images = buildFilesUrls(req, req.files.images);
     } else {
       images = ["/image.png"];
+    }
+
+    let brochure = null;
+    if (req.files && req.files.brochure && req.files.brochure[0]) {
+      brochure = buildFileUrl(req, req.files.brochure[0]);
     }
 
     if (!isConfigured) {
@@ -490,6 +495,7 @@ const createProject = async (req, res, next) => {
         project_type: projectType || 'Premium Development',
         images,
         amenities: amenitiesList,
+        brochure,
         faqs: [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -508,6 +514,7 @@ const createProject = async (req, res, next) => {
           project_type: projectType || 'Premium Development',
           images,
           amenities: amenitiesList,
+          brochure,
           faqs: []
         });
 
@@ -525,7 +532,7 @@ const createProject = async (req, res, next) => {
 const editProject = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, slug, description, status, location, address, projectType, amenities, existingImages } = req.body;
+    const { title, slug, description, status, location, address, projectType, amenities, existingImages, existingBrochure } = req.body;
 
     let amenitiesList = [];
     if (amenities) {
@@ -537,9 +544,14 @@ const editProject = async (req, res, next) => {
       finalImages = Array.isArray(existingImages) ? existingImages : [existingImages];
     }
 
-    if (req.files && req.files.length) {
-      const newUrls = buildFilesUrls(req, req.files);
+    if (req.files && req.files.images && req.files.images.length) {
+      const newUrls = buildFilesUrls(req, req.files.images);
       finalImages = [...finalImages, ...newUrls];
+    }
+
+    let brochure = existingBrochure || null;
+    if (req.files && req.files.brochure && req.files.brochure[0]) {
+      brochure = buildFileUrl(req, req.files.brochure[0]);
     }
 
     if (!isConfigured) {
@@ -556,6 +568,7 @@ const editProject = async (req, res, next) => {
           project_type: projectType,
           images: finalImages,
           amenities: amenitiesList,
+          brochure,
           updated_at: new Date().toISOString()
         };
       }
@@ -572,6 +585,7 @@ const editProject = async (req, res, next) => {
           project_type: projectType,
           images: finalImages,
           amenities: amenitiesList,
+          brochure,
           updated_at: new Date().toISOString()
         })
         .eq('id', id);
