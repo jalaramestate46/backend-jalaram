@@ -2,7 +2,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const uploadDir = path.join(__dirname, '../../public/uploads');
+// Vercel serverless environments are read-only except for the '/tmp' directory
+const uploadDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../../public/uploads');
 
 // Ensure upload directory exists safely (prevent crashes in read-only environments like Vercel)
 try {

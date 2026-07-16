@@ -61,8 +61,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Static folder configuration for uploaded local files
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// Static folder configuration for uploaded local files (serve from /tmp on Vercel)
+const staticUploadsDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, 'public/uploads');
+app.use('/uploads', express.static(staticUploadsDir));
 
 // Main API Router Mount
 app.use('/api/users', userRoutes);
