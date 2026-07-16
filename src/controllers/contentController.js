@@ -205,7 +205,7 @@ const updateContentSection = async (req, res, next) => {
       });
     }
 
-    const { data: record, error: fetchError } = await supabase
+    const { data: record, error: fetchError } = await supabaseAdmin
       .from('site_content')
       .select('*')
       .eq('id', section)

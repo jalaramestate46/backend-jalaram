@@ -957,7 +957,7 @@ const getContent = async (req, res, next) => {
       });
     } else {
       for (const s of sections) {
-        const { data: dbSec } = await supabase
+        const { data: dbSec } = await supabaseAdmin
           .from('site_content')
           .select('data')
           .eq('id', s)
@@ -1049,7 +1049,7 @@ const postContent = async (req, res, next) => {
       const cache = getSiteContentCache();
       cache[section] = dataToSave;
     } else {
-      const { data: record } = await supabase
+      const { data: record } = await supabaseAdmin
         .from('site_content')
         .select('*')
         .eq('id', section)
