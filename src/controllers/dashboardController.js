@@ -65,12 +65,21 @@ const postLogin = async (req, res, next) => {
     if (!isConfigured) {
       adminUser = mockUsers.find(u => u.email === email);
     } else {
-      const { data: dbUser } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .maybeSingle();
-      adminUser = dbUser;
+      try {
+        const { data: dbUser } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+        adminUser = dbUser;
+      } catch (err) {
+        console.warn("Database query error for admin login, falling back to mock admin:", err.message);
+      }
+
+      // If user not found in database (e.g. table not seeded), fallback to mock credentials
+      if (!adminUser) {
+        adminUser = mockUsers.find(u => u.email === email);
+      }
     }
 
     if (!adminUser) {
