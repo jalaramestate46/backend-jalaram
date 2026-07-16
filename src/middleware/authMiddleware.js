@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { isConfigured } = require('../config/supabaseClient');
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jalaram_estate_jwt_access_secret_key_2026_change_me';
@@ -21,6 +22,13 @@ const protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    
+    // Validate UUID format when Supabase is configured to avoid invalid database query syntax
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(decoded.id);
+    if (isConfigured && !isUuid) {
+      throw new jwt.JsonWebTokenError('Invalid token user ID format');
+    }
+
     req.user = decoded;
     next();
   } catch (error) {
