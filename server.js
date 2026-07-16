@@ -27,23 +27,29 @@ app.set('views', path.join(__dirname, 'src/views'));
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
+  'https://shreejalaramestateagency.com',
+  'https://www.shreejalaramestateagency.com',
   process.env.FRONTEND_URL
 ].filter(Boolean).map(url => url.replace(/\/$/, ''));
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-    
+
     const cleanOrigin = origin.replace(/\/$/, '');
-    
-    // Allow localhost, custom FRONTEND_URL, or any vercel.app subdomain
-    const isAllowed = allowedOrigins.includes(cleanOrigin) || 
-                      cleanOrigin.endsWith('.vercel.app') || 
-                      /^http:\/\/localhost:\d+$/.test(cleanOrigin);
-                      
+
+    // Allow: exact origins list, any vercel.app subdomain, localhost, or shreejalaramestateagency.com subdomains
+    const isAllowed =
+      allowedOrigins.includes(cleanOrigin) ||
+      cleanOrigin.endsWith('.vercel.app') ||
+      cleanOrigin.endsWith('.shreejalaramestateagency.com') ||
+      cleanOrigin === 'https://shreejalaramestateagency.com' ||
+      cleanOrigin === 'https://www.shreejalaramestateagency.com' ||
+      /^http:\/\/localhost:\d+$/.test(cleanOrigin);
+
     if (!isAllowed) {
-      const msg = `The CORS policy for this site does not allow access from origin: ${origin}`;
+      const msg = `CORS policy blocked access from origin: ${origin}`;
       return callback(new Error(msg), false);
     }
     return callback(null, true);
